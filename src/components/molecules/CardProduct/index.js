@@ -25,13 +25,16 @@ function Body({ title, desc }) {
 }
 
 // footer
-function Footer({ price }) {
+function Footer({ price, onClick }) {
   return (
     <div className="flex flex-col items-center justify-center px-5 pb-5">
       <span className="text-2xl font-semibold mb-2">Harga : Rp. {price}</span>
-      <Button size={"w-full"} color="bg-blue-500">
-        Buy
-      </Button>
+      <Button
+        size={"w-full"}
+        color="bg-blue-500"
+        textButton="Buy"
+        onClick={onClick}
+      />
     </div>
   );
 }
