@@ -1,32 +1,14 @@
 import CardProduct from "@/components/molecules/CardProduct";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "@/components/atoms/Buttons";
-
-const data = [
-  {
-    id: 1,
-    image: "images/odeng.jpg",
-    name: "Odeng 1",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam eius rerum doloribus aliquid sint cum exercitationem illum repellat fugiat, doloremque ducimus perferendis. Magni porro nobis itaque ipsa illo labore at.",
-    price: 25000,
-  },
-  {
-    id: 2,
-    image: "images/odeng.jpg",
-    name: "Odeng 2",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam eius rerum doloribus aliquid sint cum exercitationem illum repellat fugiat, doloremque ducimus perferendis. Magni porro nobis itaque ipsa illo labore at.",
-    price: 25000,
-  },
-  {
-    id: 3,
-    image: "images/odeng.jpg",
-    name: "Odeng 3",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam eius rerum doloribus aliquid sint cum exercitationem illum repellat fugiat, doloremque ducimus perferendis. Magni porro nobis itaque ipsa illo labore at.",
-    price: 25000,
-  },
-];
+import BackToTop from "@/components/atoms/Icons/BackToTop";
+import { data } from "@/contant/data";
+import Image from "next/image";
 
 function ProductsPage() {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const footerRef = useRef();
+  // useref : hooks dari react yang dipakai untuk membuat referensi ke elemen DOM atau mengakses elemen DOM(elemen/tag HTML)
   const [username, setUserName] = useState("");
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
@@ -36,6 +18,8 @@ function ProductsPage() {
    * "" (string kosong dalam useState("")) : nilai awal dari state username
    * ketika setUsername dipanggil dengan nilai baru, react akan me-render ulang komponen dengan nilai state yang baru
    */
+
+  // useEffect untuk mendapatkan data dari localStorage
   useEffect(() => {
     const getUsername = localStorage.getItem("username");
     if (getUsername) {
@@ -50,12 +34,15 @@ function ProductsPage() {
    * jika username ditemukan di localStorage, ia menggunakan setUsername untuk memperbarui nilai dari state username
    */
 
+  // Event handler untuk logout dan menghapus data dari localstorage
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("password");
+    localStorage.removeItem("cart");
     window.location.href = "/login";
   };
 
+  // eventHandler untuk menambahkan produk ke cart
   const handleAddToCart = (id) => {
     // jika ada id yang sama maka akan menambahkan jumlah qty +1
     if (cart.find((item) => item.id === id)) {
@@ -71,6 +58,7 @@ function ProductsPage() {
     }
   };
 
+  // useEffect untuk menghitung total harga dan menyimpan data cart ke localStorage
   useEffect(() => {
     if (cart.length > 0) {
       const sum = cart.reduce((total, item) => {
@@ -81,6 +69,41 @@ function ProductsPage() {
       localStorage.setItem("cart", JSON.stringify(cart));
     }
   }, [cart]);
+
+  // useEffect untuk menghandle button backToTop
+  useEffect(() => {
+    function handleScroll() {
+      // footerRef.current.offsetTop untuk ambil nilai offsetTop(posisi vertikal atas/bawah) dari elemen footer yang diakses footerRef
+      const footerTop = footerRef.current.offsetTop;
+      // window.innerHeight : untuk ambil nilai tinggi objek window(tampilkan viewport tanpa toolbar & scrollbar)
+      const viewportHeight = window.innerHeight;
+      // window.scrollY : untuk ambil nilai scroll sumbu Y dari objek window(posisi scroll di layar vertikal)
+      const scrollPosition = window.scrollY;
+
+      // cek apkaah posisi scroll dilayar sudah mencapai elemen footer
+      if (scrollPosition + viewportHeight >= footerTop) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    }
+
+    // event listener untuk ngecek scroll
+    // fungsi handleScroll akan dijalankan pada saat event scroll terjadi(pada saat layar discroll)
+    window.addEventListener("scroll", handleScroll);
+
+    // kembalikan fungsi yang akan dijalankan saat layar berhenti discroll
+    return () => {
+      // hapus event listener pada event scroll ketika scroll berhenti
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [footerRef]); // <- [footerRef] akan dipantau setiap kali ada perubahan
+
+  // fungsi/eventHandle yang akan dijalankan ketika button di klik
+  const handleBackToTop = () => {
+    // window.scrollTo L untuk scroll layar keatas dengan smooth animation
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -118,10 +141,12 @@ function ProductsPage() {
                 return (
                   <>
                     <div key={item.id} className="flex p-4 border rounded-lg">
-                      <img
+                      <Image
                         src={datas.image}
                         alt="cart item"
                         className="max-w-[100px]"
+                        width={500}
+                        height={500}
                       />
                       <div className="flex justify-between w-full">
                         <div className="flex flex-col justify-between ml-3">
@@ -159,6 +184,20 @@ function ProductsPage() {
           </div>
         )}
       </div>
+      {showBackToTop && (
+        <div
+          onClick={handleBackToTop}
+          className="fixed bottom-20 right-5 bg-blue-600 p-2 rounded-full"
+        >
+          <BackToTop />
+        </div>
+      )}
+      <footer
+        ref={footerRef}
+        className="text-center p-5 bg-gray-800 text-white w-full"
+      >
+        Copyright by Danu
+      </footer>
     </>
   );
 }
