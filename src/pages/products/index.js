@@ -1,5 +1,11 @@
 import CardProduct from "@/components/molecules/CardProduct";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import Button from "@/components/atoms/Buttons";
 import BackToTop from "@/components/atoms/Icons/BackToTop";
 import { data } from "@/contant/data";
@@ -12,12 +18,20 @@ function ProductsPage() {
   const [username, setUserName] = useState("");
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   /** useState : hooks dari react yang memungkinkan kita menambahkan state ke functional component.
    * username : variabel state yang akan menyimpan nilai username
    * setUsername : fungsi yang dipake buat memperbaharui nilai username
    * "" (string kosong dalam useState("")) : nilai awal dari state username
    * ketika setUsername dipanggil dengan nilai baru, react akan me-render ulang komponen dengan nilai state yang baru
    */
+
+  const searchProduct = useMemo(() => {
+    return data.filter((product) =>
+      product.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
 
   // useEffect untuk mendapatkan data dari localStorage
   useEffect(() => {
@@ -43,20 +57,27 @@ function ProductsPage() {
   };
 
   // eventHandler untuk menambahkan produk ke cart
-  const handleAddToCart = (id) => {
-    // jika ada id yang sama maka akan menambahkan jumlah qty +1
-    if (cart.find((item) => item.id === id)) {
-      // dia akan mapping dan membongkar itemnya untuk mencari data dengan id yang sama
-      setCart(
-        cart.map((item) =>
-          item.id === id ? { ...item, qty: item.qty + 1 } : item
-        )
-      );
-    } else {
-      // kalo data nya cuma 1 maka cuma akan di set satu
-      setCart([...cart, { id, qty: 1 }]);
-    }
-  };
+  // eventHandler diganti ke useCallback
+  /** UseCallback : hooks yang dipakai untuk menyimpan FUNGSI di cache agar fungsi hanya dijalankan
+   * ketika ada perubahan pada nilai fungsi tersebut
+   */
+  const handleAddToCart = useCallback(
+    (id) => {
+      // jika ada id yang sama maka akan menambahkan jumlah qty +1
+      if (cart.find((item) => item.id === id)) {
+        // dia akan mapping dan membongkar itemnya untuk mencari data dengan id yang sama
+        setCart(
+          cart.map((item) =>
+            item.id === id ? { ...item, qty: item.qty + 1 } : item
+          )
+        );
+      } else {
+        // kalo data nya cuma 1 maka cuma akan di set satu
+        setCart([...cart, { id, qty: 1 }]);
+      }
+    },
+    [cart]
+  );
 
   // useMemo untuk menghitung total harga cart dan menyimpan hasil perhitungannya ke cache
   /** usememo : hooks untuk menyimpan hasil komputasi(perhitungan matematika) di cache
@@ -117,6 +138,31 @@ function ProductsPage() {
     <>
       <div className="flex justify-between items-center bg-blue-500 px-5 py-4">
         <h1 className="text-xl">Welcome, {username}</h1>
+        <div className="w-[300px]">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="py-2 px-4 rounded-full w-[300px]"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              if (e.target.value !== "") {
+                setShowSearch(true);
+              } else {
+                setShowSearch(false);
+              }
+            }}
+          />
+          {showSearch && searchProduct.length > 0 && (
+            <ul className="absolute bg-white text-black w-[300px] mt-1 py-2 px-3 rounded-lg">
+              {searchProduct.map((product) => (
+                <li key={product.id} className="my-1 text-black">
+                  {product.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <Button color="bg-red-500" textButton="Logout" onClick={handleLogout} />
       </div>
       <div className="flex px-5 py-4">
