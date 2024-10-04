@@ -289,22 +289,45 @@ function ProductsPage({ products }) {
  * dilakukan di sisi server, lalu dikirim ke client hasil render webnya.
  * teknik ini bermanfaat untuk meningkatkan performa website
  */
-export async function getServerSideProps() {
-  // cara pertama untuk manggil service satu satu
-  // try {
-  //   const products = await getProducts();
-  //   const slicedProducts = products.slice(0, 8);
-  //   return {
-  //     props: {
-  //       products: slicedProducts || [],
-  //     },
-  //   };
-  // } catch (error) {
-  //   console.log(error);
-  // }
+// export async function getServerSideProps() {
+//   // cara pertama untuk manggil service satu satu
+//   // try {
+//   //   const products = await getProducts();
+//   //   const slicedProducts = products.slice(0, 8);
+//   //   return {
+//   //     props: {
+//   //       products: slicedProducts || [],
+//   //     },
+//   //   };
+//   // } catch (error) {
+//   //   console.log(error);
+//   // }
 
-  // cara kedua manggil beberapa service sekaligus menggunakan Promise.all
-  // eg. const [productResults, userLogin] = await Promise.all([getProducts(), login()])
+//   // cara kedua manggil beberapa service sekaligus menggunakan Promise.all
+//   // eg. const [productResults, userLogin] = await Promise.all([getProducts(), login()])
+//   try {
+//     const [productResults] = await Promise.all([getProducts()]);
+//     const slicedProducts = productResults.slice(0, 8);
+//     return {
+//       props: {
+//         products: slicedProducts || [],
+//       },
+//     };
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+/** Static site generation : teknik yang memuat halaman website pada saat proses build time (npm run build)
+ * dan halaman websitenya bisa di cache sehingga ketika user kembali ke halaman dengan SSG
+ * proses memuatnya lebih ceapt.
+ * teknik ini di khususkan untuk halaman website yang datanya statis atau tidak berubah-ubah.
+ *
+ * build time: adalah proses penyiapan aplikasi disisi server saat di deploy
+ * run time: proses setelah build dimana aplikasi dijalanin di server/browser
+ */
+
+export async function getStaticProps() {
   try {
     const [productResults] = await Promise.all([getProducts()]);
     const slicedProducts = productResults.slice(0, 8);
