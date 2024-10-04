@@ -327,6 +327,25 @@ function ProductsPage({ products }) {
  * run time: proses setelah build dimana aplikasi dijalanin di server/browser
  */
 
+// export async function getStaticProps() {
+//   try {
+//     const [productResults] = await Promise.all([getProducts()]);
+//     const slicedProducts = productResults.slice(0, 8);
+//     return {
+//       props: {
+//         products: slicedProducts || [],
+//       },
+//     };
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
+/** Incremental static regeneration : teknik yang menggabungkan SSR dan SSG, dimana teknik ini
+ * memuat halaman website secara statis namun halamannya bisa di update secara dinamis
+ * jika ada perubahan data.
+ */
+
 export async function getStaticProps() {
   try {
     const [productResults] = await Promise.all([getProducts()]);
@@ -335,6 +354,7 @@ export async function getStaticProps() {
       props: {
         products: slicedProducts || [],
       },
+      revalidate: 60, // <- revalidate akan merefresh/mengupdate data setelah 60 detik
     };
   } catch (error) {
     console.log(error);
