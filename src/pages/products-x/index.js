@@ -1,6 +1,4 @@
-import Button from "@/components/atoms/Buttons";
 import CardProduct from "@/components/molecules/CardProduct";
-import Image from "next/image";
 import React, {
   useState,
   useEffect,
@@ -8,65 +6,49 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { data } from "@/constant/data";
+import Button from "@/components/atoms/Buttons";
 import BackToTop from "@/components/atoms/Icons/BackToTop";
-import { getProducts } from "@/services/products";
-import { getUsername } from "@/services/auth";
+import { data } from "@/constant/data";
+import Image from "next/image";
 
 function ProductsPage() {
-  const footerRef = useRef();
   const [showBackToTop, setShowBackToTop] = useState(false);
-  //   useref : hooks dari react yang dipake untuk membuat referensi ke elemen DOM atau mengakses elemen DOM(elemen/tag HTML)
-  const [username, setUsername] = useState("");
+  const footerRef = useRef();
+  // useref : hooks dari react yang dipakai untuk membuat referensi ke elemen DOM atau mengakses elemen DOM(elemen/tag HTML)
+  const [username, setUserName] = useState("");
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [products, setProducts] = useState([]); // <- state untuk nyimpen data dari API
-  console.log(products);
-
-  // useEffect untuk manggil service getProducts
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const dataProduct = await getProducts();
-        setProducts(dataProduct.slice(0, 8));
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchProducts();
-  }, []);
+  /** useState : hooks dari react yang memungkinkan kita menambahkan state ke functional component.
+   * username : variabel state yang akan menyimpan nilai username
+   * setUsername : fungsi yang dipake buat memperbaharui nilai username
+   * "" (string kosong dalam useState("")) : nilai awal dari state username
+   * ketika setUsername dipanggil dengan nilai baru, react akan me-render ulang komponen dengan nilai state yang baru
+   */
 
   const searchProduct = useMemo(() => {
-    return products.filter((product) =>
-      product.title.toLowerCase().includes(search.toLowerCase())
+    return data.filter((product) =>
+      product.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [search]);
 
-  // const searchProduct = useCallback(() => {
-  //   return data.filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
-  // }, [search]);
-
-  //   useEffect untuk mendapatkan data dari localStorage
+  // useEffect untuk mendapatkan data dari localStorage
   useEffect(() => {
-    // const getUsername = localStorage.getItem("username");
-    // if (getUsername) {
-    //   setUsername(getUsername);
-    // }
-    // ambil token yang disimpan di localStorage
-    const token = localStorage.getItem("token");
-    // cek kalo ada token maka akan ambil nama user dari token yang di decode
-    if (token) {
-      // kirim nama user tsb ke state username
-      setUsername(getUsername(token));
-    } else {
-      window.location.href = "/login";
+    const getUsername = localStorage.getItem("username");
+    if (getUsername) {
+      setUserName(getUsername);
     }
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
   }, []);
+  /** useEffect(() => {},[]) : hooks dari react yang memungkinkan kita untuk menambahkan side effect ke functional component
+   * useEffect dipakai untuk memperbaharui komponen ketika ada perubahan pada state.
+   * [] (array kosong/dependency array) : argumen kedua milik useEffect yang artinya efek ini akan dijalankan sekali
+   * saat komponen pertama kali dirender(load).
+   * jika username ditemukan di localStorage, ia menggunakan setUsername untuk memperbarui nilai dari state username
+   */
 
-  //    Event handler untuk logout dan menghapus data dari localStorage
+  // Event handler untuk logout dan menghapus data dari localstorage
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("password");
@@ -74,22 +56,23 @@ function ProductsPage() {
     window.location.href = "/login";
   };
 
-  //   eventHandler diganti ke useCallback
-  /** UseCallback : hooks yang dipake buat nuyimpen FUNGSI di cache agar fungsi hanya dijalankan
+  // eventHandler untuk menambahkan produk ke cart
+  // eventHandler diganti ke useCallback
+  /** UseCallback : hooks yang dipakai untuk menyimpan FUNGSI di cache agar fungsi hanya dijalankan
    * ketika ada perubahan pada nilai fungsi tersebut
    */
   const handleAddToCart = useCallback(
     (id) => {
       // jika ada id yang sama maka akan menambahkan jumlah qty +1
       if (cart.find((item) => item.id === id)) {
-        //dia akan mapping dan membongkar itemnya untuk mencari data dengan id yg sama
+        // dia akan mapping dan membongkar itemnya untuk mencari data dengan id yang sama
         setCart(
           cart.map((item) =>
             item.id === id ? { ...item, qty: item.qty + 1 } : item
           )
         );
       } else {
-        // kalo data nya cma 1 maka cma akan di set satu
+        // kalo data nya cuma 1 maka cuma akan di set satu
         setCart([...cart, { id, qty: 1 }]);
       }
     },
@@ -99,61 +82,55 @@ function ProductsPage() {
   // useMemo untuk menghitung total harga cart dan menyimpan hasil perhitungannya ke cache
   /** usememo : hooks untuk menyimpan hasil komputasi(perhitungan matematika) di cache
    * agar tidak perlu dijalankan/dihitung ulang ketika tidak ada perubahan.
-   * dalam kasus ini, useMemo untuk nyimpen hasil total cart dicache sehingga ketika halaman direfresh,
+   * dalam kasus ini, useMemo untuk menyimpan hasil total cart dicache sehingga ketika halaman direfresh,
    * total cart ga di itung ulang kalo nilainya ga berubah
-   *
-   * product?.price <- tanda tanya (?) pada product adalah optional chaining
-   * optional chaining : sebuah penjagaan untuk memastikan nilai/propertinya ada atau tidak dari suatu data,
-   * manfaat dari optional chaining adalah untuk menghindari error null atau undefined
    */
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
-      const product = products.find((product) => product.id === item.id);
-      return total + product?.price * item.qty;
+      const product = data.find((product) => product.id === item.id);
+      return total + product.price * item.qty;
     }, 0);
-  }, [cart, products]); // <- data yang lagi dipantau perubahannya
+  }, [cart]); // <- data yang lagi dipantau perubahannya
 
-  //   useEffect untuk menghitung total harga dan menyimpan data Cart ke localStorage
+  // useEffect untuk menghitung total harga dan menyimpan data cart ke localStorage
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cart));
     }
   }, [cart]);
 
-  //   useEffect untuk menghandle button backToTop
+  // useEffect untuk menghandle button backToTop
   useEffect(() => {
-    const handleScroll = () => {
+    function handleScroll() {
       // footerRef.current.offsetTop untuk ambil nilai offsetTop(posisi vertikal atas/bawah) dari elemen footer yang diakses footerRef
       const footerTop = footerRef.current.offsetTop;
-
-      //   window.innerHeight : untuk ambil nilai tinggi objek window(tampilan viewport tanpa toolbar & scrollbar)
+      // window.innerHeight : untuk ambil nilai tinggi objek window(tampilkan viewport tanpa toolbar & scrollbar)
       const viewportHeight = window.innerHeight;
-
-      //   window.scrollY : untuk ambil nilai scroll sumbu Y dari objek window(posisi scroll di layar vertikal)
+      // window.scrollY : untuk ambil nilai scroll sumbu Y dari objek window(posisi scroll di layar vertikal)
       const scrollPosition = window.scrollY;
 
-      //   cek apakah posisi scroll dilayar sudah mencapai elemen footer?\]
+      // cek apkaah posisi scroll dilayar sudah mencapai elemen footer
       if (scrollPosition + viewportHeight >= footerTop) {
         setShowBackToTop(true);
       } else {
         setShowBackToTop(false);
       }
-    };
+    }
 
-    //   event listener untuk ngecek scroll
-    // fungsi handleScroll akan dijalanin pada saat event scroll terjadi(pada saat layar discroll)
+    // event listener untuk ngecek scroll
+    // fungsi handleScroll akan dijalankan pada saat event scroll terjadi(pada saat layar discroll)
     window.addEventListener("scroll", handleScroll);
 
-    //   kembalikan fungsi yang akan dijalankan saat layar berhenti discroll
+    // kembalikan fungsi yang akan dijalankan saat layar berhenti discroll
     return () => {
       // hapus event listener pada event scroll ketika scroll berhenti
       window.removeEventListener("scroll", handleScroll);
     };
   }, [footerRef]); // <- [footerRef] akan dipantau setiap kali ada perubahan
 
-  //   fungsi/eventHandle yang akan dijalankan ketika button di klik
+  // fungsi/eventHandle yang akan dijalankan ketika button di klik
   const handleBackToTop = () => {
-    // window.scrollTo L untuk men-scrikk kayar keatas dengan animasi yang smooth
+    // window.scrollTo L untuk scroll layar keatas dengan smooth animation
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -176,13 +153,11 @@ function ProductsPage() {
               }
             }}
           />
-          {/* {searchProduct()  jika useCalllback pake () */}
           {showSearch && searchProduct.length > 0 && (
             <ul className="absolute bg-white text-black w-[300px] mt-1 py-2 px-3 rounded-lg">
-              {/* {searchProduct() jika useCalllback pake () */}
               {searchProduct.map((product) => (
-                <li key={product.id} className="my-1">
-                  {product.title}
+                <li key={product.id} className="my-1 text-black">
+                  {product.name}
                 </li>
               ))}
             </ul>
@@ -195,13 +170,15 @@ function ProductsPage() {
           <h1 className="text-3xl font-bold mb-2 uppercase">Products</h1>
           {/* products */}
           <div className="flex flex-wrap gap-4">
-            {products.map((item) => (
+            {data.map((item) => (
               <CardProduct key={item.id}>
                 <CardProduct.Header image={item.image} />
-                <CardProduct.Body title={item.title} desc={item.description} />
+                <CardProduct.Body title={item.name} desc={item.desc} />
                 <CardProduct.Footer
                   price={item.price}
-                  onClick={() => handleAddToCart(item.id)}
+                  onClick={() => {
+                    handleAddToCart(item.id);
+                  }}
                 />
               </CardProduct>
             ))}
@@ -209,29 +186,29 @@ function ProductsPage() {
         </div>
         {/* cart */}
         {cart.length > 0 && (
-          <div className="cart w-2/3">
+          <div className="cart w-1/3">
             <h1 className="text-3xl font-bold mb-2 uppercase">Cart</h1>
             <div className="flex flex-col gap-2">
               {cart.map((item) => {
-                // logic untuk nyari id dalam variabel data, kalo id yg di data sama dengan id yg ada di cart maka ambil produknya
-                const datas = products.find((data) => data.id === item.id);
+                // logic untuk mencari id di dalam variabel data, kalo id yang di data sama dengan id yang ada di cart maka abmil produknya
+                const datas = data.find((data) => data.id === item.id);
                 return (
                   <>
                     <div key={item.id} className="flex p-4 border rounded-lg">
                       <Image
-                        src={datas?.image}
-                        width={100}
-                        height={100}
+                        src={datas.image}
                         alt="cart item"
-                        className="aspect-square object-contain border"
+                        className="max-w-[100px]"
+                        width={500}
+                        height={500}
                       />
                       <div className="flex justify-between w-full">
                         <div className="flex flex-col justify-between ml-3">
-                          <span className="font-bold text-xl line-clamp-2">
-                            {datas?.title}
+                          <span className="font-bold text-xl">
+                            {datas.name}
                           </span>
                           <span className="font-semibold">
-                            {(datas?.price * item.qty).toLocaleString("id-ID", {
+                            {(datas.price * item.qty).toLocaleString("id-ID", {
                               style: "currency",
                               currency: "IDR",
                             })}
