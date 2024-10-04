@@ -12,12 +12,15 @@ import { data } from "@/constant/data";
 import BackToTop from "@/components/atoms/Icons/BackToTop";
 import { getProducts } from "@/services/products";
 import { getUsername } from "@/services/auth";
+import useLogin from "@/hooks/useLogin";
+import formatCurrency from "@/helpers/utils/formatCurrency";
 
 function ProductsPage() {
   const footerRef = useRef();
   const [showBackToTop, setShowBackToTop] = useState(false);
   //   useref : hooks dari react yang dipake untuk membuat referensi ke elemen DOM atau mengakses elemen DOM(elemen/tag HTML)
-  const [username, setUsername] = useState("");
+  // const [username, setUsername] = useState("");
+  const username = useLogin();
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -55,14 +58,14 @@ function ProductsPage() {
     //   setUsername(getUsername);
     // }
     // ambil token yang disimpan di localStorage
-    const token = localStorage.getItem("token");
-    // cek kalo ada token maka akan ambil nama user dari token yang di decode
-    if (token) {
-      // kirim nama user tsb ke state username
-      setUsername(getUsername(token));
-    } else {
-      window.location.href = "/login";
-    }
+    // const token = localStorage.getItem("token");
+    // // cek kalo ada token maka akan ambil nama user dari token yang di decode
+    // if (token) {
+    //   // kirim nama user tsb ke state username
+    //   setUsername(getUsername(token));
+    // } else {
+    //   window.location.href = "/login";
+    // }
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
   }, []);
 
@@ -231,10 +234,11 @@ function ProductsPage() {
                             {datas?.title}
                           </span>
                           <span className="font-semibold">
-                            {(datas?.price * item.qty).toLocaleString("id-ID", {
+                            {/* {(datas?.price * item.qty).toLocaleString("id-ID", {
                               style: "currency",
                               currency: "IDR",
-                            })}
+                            })} */}
+                            {formatCurrency(datas?.price * item.qty)}
                           </span>
                         </div>
                         <div className="flex flex-col justify-center items-center">
@@ -252,10 +256,11 @@ function ProductsPage() {
             <div className="flex justify-between px-4 py-2 border mt-2">
               <span className="font-semibold">total</span>
               <span className="font-semibold">
-                {cartTotal.toLocaleString("id-ID", {
+                {/* {cartTotal.toLocaleString("id-ID", {
                   style: "currency",
                   currency: "IDR",
-                })}
+                })} */}
+                {formatCurrency(cartTotal)}
               </span>
             </div>
           </div>
