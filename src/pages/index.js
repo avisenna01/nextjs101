@@ -2,16 +2,37 @@
 file ini akan menjadi halaman utama di aplikasi next js*/
 
 import Button from "@/components/atoms/Buttons";
-
 import Card from "@/components/molecules/CardWithChildren";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
+import { isMobileScreenAtom } from "@/jotai/atoms";
+import { useAtom } from "jotai";
+// import { useEffect, useState } from "react";
 
 export default function Home() {
-  const isMobileScreen = useSelector((state) => state.screen.isMobileScreen);
+  // panggil state isMobileScreen dari jotai yang udah diset secara global
+  // const [isMobileScreen, setIsMobileScreen] = useAtom(isMobileScreenAtom);
+  // dibawah ini state biasa
+  // const [isLargeScreen, setIsLargeScreen] = useState(false)
+
+  // useEffect(() => {
+  //   function handleResize() {
+  //     setIsMobileScreen(window.innerWidth < 768);
+  //     setIsLargeScreen(window.innerWidth >= 1240);
+  //   }
+  //   handleResize();
+
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, [setIsMobileScreen]);
+  // console.log(isMobileScreen,isLargeScreen)
+
+  // const isMobileScreen = useSelector((state) => state.screen.isMobileScreen);
   // const isLargeScreen = useSelector((state) => state.screen.isLargeScreen);
   // const { isMobileScreen, isLargeScreen } = useSelector(
   //   (state) => state.screen
   // );
+  // const [isMobileScreen, setIsMobileScreen] = useAtom(isMobileScreen);
+  const [isMobileScreen] = useAtom(isMobileScreenAtom);
   console.log("is mobile screen: ", isMobileScreen);
   // console.log("is large screen: ", isLargeScreen);
 
