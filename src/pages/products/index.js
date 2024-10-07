@@ -14,6 +14,7 @@ import { getProducts } from "@/services/products";
 import { getUsername } from "@/services/auth";
 import useLogin from "@/hooks/useLogin";
 import formatCurrency from "@/helpers/utils/formatCurrency";
+import Modal from "@/components/atoms/Modal";
 
 function ProductsPage({ products }) {
   const footerRef = useRef();
@@ -25,6 +26,7 @@ function ProductsPage({ products }) {
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   // const [products, setProducts] = useState([]); // <- state untuk nyimpen data dari API
   console.log(products);
 
@@ -69,6 +71,10 @@ function ProductsPage({ products }) {
     // }
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
   }, []);
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
 
   //    Event handler untuk logout dan menghapus data dari localStorage
   const handleLogout = () => {
@@ -192,7 +198,16 @@ function ProductsPage({ products }) {
             </ul>
           )}
         </div>
-        <Button color="bg-red-500" textButton="Logout" onClick={handleLogout} />
+        <Button
+          color="bg-red-500"
+          textButton="Logout"
+          onClick={() => {
+            setShowModal(true);
+          }}
+        />
+        {showModal && (
+          <Modal handleClose={handleClose} handleLogout={handleLogout} />
+        )}
       </div>
       <div className="flex px-5 py-4">
         <div className="flex flex-col">
