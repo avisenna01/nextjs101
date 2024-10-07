@@ -1,0 +1,6 @@
+/** file constant : identifier unik untuk setiap jenis action type
+ * action type ini dipakai untuk identifikasi jenis action yang dikirim ke reducer
+ */
+
+export const SET_IS_MOBILE_SCREEN = "SET_IS_MOBILE_SCREEN";
+export const SET_IS_LARGE_SCREEN = "SET_IS_LARGE_SCREEN";
