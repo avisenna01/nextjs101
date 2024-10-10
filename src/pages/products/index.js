@@ -134,7 +134,7 @@ function ProductsPage({ products }) {
   useEffect(() => {
     const handleScroll = () => {
       // footerRef.current.offsetTop untuk ambil nilai offsetTop(posisi vertikal atas/bawah) dari elemen footer yang diakses footerRef
-      const footerTop = footerRef.current.offsetTop;
+      const footerTop = footerRef?.current?.offsetTop;
 
       //   window.innerHeight : untuk ambil nilai tinggi objek window(tampilan viewport tanpa toolbar & scrollbar)
       const viewportHeight = window.innerHeight;
@@ -215,7 +215,7 @@ function ProductsPage({ products }) {
           {/* products */}
           <div className="flex flex-wrap gap-4">
             {products.map((item) => (
-              <CardProduct key={item.id}>
+              <CardProduct key={item.id} link={`/products/${item.id}`}>
                 <CardProduct.Header image={item.image} />
                 <CardProduct.Body title={item.title} desc={item.description} />
                 <CardProduct.Footer
