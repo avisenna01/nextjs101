@@ -24,9 +24,16 @@ const Login = () => {
       password: event.target.password.value,
     };
 
+    const authLogin = {
+      username: event.target.username.value,
+      password: event.target.password.value,
+    };
+
+    console.log(payload);
+    console.log(authLogin);
     // panggil service login
     try {
-      const response = await login(payload);
+      const response = await login(payload, authLogin);
       console.log(response);
       // cek token, klo gaada token bakal diarahkan ke halaman login
       if (response.status) {

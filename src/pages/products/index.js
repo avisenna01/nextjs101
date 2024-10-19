@@ -45,8 +45,9 @@ function ProductsPage({ products }) {
   // }, []);
 
   const searchProduct = useMemo(() => {
-    return products.filter((product) =>
-      product.title.toLowerCase().includes(search.toLowerCase())
+    return products.filter(
+      (product) => product.title.toLowerCase().includes(search.toLowerCase())
+      // product.productName.toLowerCase().includes(search.toLowerCase())
     );
   }, [search]);
 
@@ -215,9 +216,16 @@ function ProductsPage({ products }) {
           {/* products */}
           <div className="flex flex-wrap gap-4">
             {products.map((item) => (
-              <CardProduct key={item.id} link={`/products/${item.id}`}>
-                <CardProduct.Header image={item.image} />
-                <CardProduct.Body title={item.title} desc={item.description} />
+              <CardProduct key={item.id}>
+                <CardProduct.Header
+                  image={item.image}
+                  link={`/products/${item.id}`}
+                />
+                <CardProduct.Body
+                  title={item.title}
+                  desc={item.description}
+                  link={`/products/${item.id}`}
+                />
                 <CardProduct.Footer
                   price={item.price}
                   onClick={() => handleAddToCart(item.id)}
@@ -304,34 +312,36 @@ function ProductsPage({ products }) {
  * dilakukan di sisi server, lalu dikirim ke client hasil render webnya.
  * teknik ini bermanfaat untuk meningkatkan performa website
  */
-// export async function getServerSideProps() {
-//   // cara pertama untuk manggil service satu satu
-//   // try {
-//   //   const products = await getProducts();
-//   //   const slicedProducts = products.slice(0, 8);
-//   //   return {
-//   //     props: {
-//   //       products: slicedProducts || [],
-//   //     },
-//   //   };
-//   // } catch (error) {
-//   //   console.log(error);
-//   // }
+export async function getServerSideProps() {
+  // cara pertama untuk manggil service satu satu
+  try {
+    const products = await getProducts();
+    console.log(products);
+    console.log("yowww");
+    const slicedProducts = products.slice(0, 8);
+    return {
+      props: {
+        products: slicedProducts || [],
+      },
+    };
+  } catch (error) {
+    console.log(error);
+  }
 
-//   // cara kedua manggil beberapa service sekaligus menggunakan Promise.all
-//   // eg. const [productResults, userLogin] = await Promise.all([getProducts(), login()])
-//   try {
-//     const [productResults] = await Promise.all([getProducts()]);
-//     const slicedProducts = productResults.slice(0, 8);
-//     return {
-//       props: {
-//         products: slicedProducts || [],
-//       },
-//     };
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+  //   // cara kedua manggil beberapa service sekaligus menggunakan Promise.all
+  //   // eg. const [productResults, userLogin] = await Promise.all([getProducts(), login()])
+  //   try {
+  //     const [productResults] = await Promise.all([getProducts()]);
+  //     const slicedProducts = productResults.slice(0, 8);
+  //     return {
+  //       props: {
+  //         products: slicedProducts || [],
+  //       },
+  //     };
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+}
 
 /** Static site generation : teknik yang memuat halaman website pada saat proses build time (npm run build)
  * dan halaman websitenya bisa di cache sehingga ketika user kembali ke halaman dengan SSG
@@ -361,19 +371,19 @@ function ProductsPage({ products }) {
  * jika ada perubahan data.
  */
 
-export async function getStaticProps() {
-  try {
-    const [productResults] = await Promise.all([getProducts()]);
-    const slicedProducts = productResults.slice(0, 8);
-    return {
-      props: {
-        products: slicedProducts || [],
-      },
-      revalidate: 60, // <- revalidate akan merefresh/mengupdate data setelah 60 detik
-    };
-  } catch (error) {
-    console.log(error);
-  }
-}
+// export async function getStaticProps() {
+//   try {
+//     const [productResults] = await Promise.all([getProducts()]);
+//     const slicedProducts = productResults.slice(0, 8);
+//     return {
+//       props: {
+//         products: slicedProducts || [],
+//       },
+//       revalidate: 60, // <- revalidate akan merefresh/mengupdate data setelah 60 detik
+//     };
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
 export default ProductsPage;
